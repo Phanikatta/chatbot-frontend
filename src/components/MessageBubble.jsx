@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { deleteMessage } from '../services/api'
 import { useChatStore } from '../store/chatStore'
 import toast from 'react-hot-toast'
+import { useTextToSpeech } from '../hooks/useSpeech'
 
 export default function MessageBubble({ message }) {
+  const { speaking, supported: ttsSupported, toggle: toggleSpeak } = useTextToSpeech()
   const isUser = message.role === 'user'
   const [copied, setCopied] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -115,73 +117,111 @@ export default function MessageBubble({ message }) {
         </div>
 
         {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
 
-          {/* Copy button — always show for AI, hover for user */}
-          <button onClick={copy} style={{
-            padding: '3px 10px', borderRadius: '6px',
+        {/* Copy */}
+        <button onClick={copy} style={{
+            padding: '4px 10px', borderRadius: '6px',
             background: 'var(--bg-card)',
             border: '1px solid var(--border)',
             fontSize: '11px',
             color: copied ? 'var(--accent)' : 'var(--text-muted)',
             cursor: 'pointer', fontFamily: 'Inter, sans-serif',
             transition: 'color 0.2s'
-          }}>
+        }}>
             {copied ? '✓ Copied' : '⎘ Copy'}
-          </button>
+        </button>
 
-          {/* Delete button — confirm flow */}
-          {!confirmDelete ? (
+        {/* Speak — AI messages only */}
+        {!isUser && ttsSupported && (
             <button
-              onClick={() => setConfirmDelete(true)}
-              style={{
-                padding: '3px 10px', borderRadius: '6px',
+            onClick={() => toggleSpeak(message.content)}
+            title={speaking ? 'Stop speaking' : 'Read aloud'}
+            style={{
+                padding: '4px 10px', borderRadius: '6px',
+                background: speaking ? 'rgba(229,9,20,0.1)' : 'var(--bg-card)',
+                border: `1px solid ${speaking ? 'var(--accent)' : 'var(--border)'}`,
+                fontSize: '11px',
+                color: speaking ? 'var(--accent)' : 'var(--text-muted)',
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                display: 'flex', alignItems: 'center', gap: '4px',
+                transition: 'all 0.2s'
+            }}>
+            {speaking ? (
+                <>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--accent)">
+                    <rect x="6" y="4" width="4" height="16"/>
+                    <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+                Stop
+                </>
+            ) : (
+                <>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2">
+                    <polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/>
+                    <path d="M15.54,8.46a5,5,0,0,1,0,7.07"/>
+                    <path d="M19.07,4.93a10,10,0,0,1,0,14.14"/>
+                </svg>
+                Speak
+                </>
+            )}
+            </button>
+        )}
+
+        {/* Delete */}
+        {!confirmDelete ? (
+            <button
+            onClick={() => setConfirmDelete(true)}
+            style={{
+                padding: '4px 10px', borderRadius: '6px',
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border)',
                 fontSize: '11px', color: 'var(--text-muted)',
                 cursor: 'pointer', fontFamily: 'Inter, sans-serif',
                 display: 'flex', alignItems: 'center', gap: '4px',
                 transition: 'color 0.2s, border-color 0.2s'
-              }}
-              onMouseEnter={e => {
+            }}
+            onMouseEnter={e => {
                 e.currentTarget.style.color = 'var(--accent)'
                 e.currentTarget.style.borderColor = 'var(--accent)'
-              }}
-              onMouseLeave={e => {
+            }}
+            onMouseLeave={e => {
                 e.currentTarget.style.color = 'var(--text-muted)'
                 e.currentTarget.style.borderColor = 'var(--border)'
-              }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2">
                 <polyline points="3,6 5,6 21,6"/>
                 <path d="M19,6l-1,14H6L5,6"/>
                 <path d="M9,6V4h6v2"/>
-              </svg>
-              Delete
+            </svg>
+            Delete
             </button>
-          ) : (
+        ) : (
             <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Sure?</span>
-              <button onClick={handleDelete} style={{
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Sure?</span>
+            <button onClick={handleDelete} style={{
                 padding: '3px 8px', borderRadius: '6px',
                 background: 'var(--accent)', border: 'none',
                 color: 'white', fontSize: '11px',
                 fontWeight: 600, cursor: 'pointer',
                 fontFamily: 'Inter, sans-serif'
-              }}>
+            }}>
                 {deleting ? '...' : 'Yes'}
-              </button>
-              <button onClick={() => setConfirmDelete(false)} style={{
+            </button>
+            <button onClick={() => setConfirmDelete(false)} style={{
                 padding: '3px 8px', borderRadius: '6px',
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border)',
                 color: 'var(--text-muted)',
                 fontSize: '11px', cursor: 'pointer',
                 fontFamily: 'Inter, sans-serif'
-              }}>
+            }}>
                 No
-              </button>
+            </button>
             </div>
-          )}
+        )}
         </div>
       </div>
     </div>
