@@ -8,13 +8,14 @@ import toast from 'react-hot-toast'
 
 export default function ChatWindow() {
   const {
-    activeSession,
-    messages,
-    isTyping,
-    addMessage,
-    setTyping,
-    updateSessionTitle: updateTitle
-  } = useChatStore()
+  activeSession,
+  messages,
+  isTyping,
+  addMessage,
+  setTyping,
+  updateSessionTitle: updateTitle,
+  systemPrompt
+} = useChatStore()
 
   const bottomRef = useRef(null)
 
@@ -76,7 +77,7 @@ export default function ChatWindow() {
     setTyping(true)
 
     try {
-      const res = await sendMessage(text, activeSession.id)
+      const res = await sendMessage(text, activeSession.id, systemPrompt)
       addMessage({ role: 'assistant', content: res.data.response })
 
       if (isFirst) {

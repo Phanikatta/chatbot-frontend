@@ -1,10 +1,13 @@
 import { create } from 'zustand'
 
-export const useChatStore = create((set, get) => ({
+const DEFAULT_PROMPT = 'You are a helpful, friendly, and knowledgeable AI assistant. Answer questions clearly and concisely.'
+
+export const useChatStore = create((set) => ({
   sessions: [],
   activeSession: null,
   messages: [],
   isTyping: false,
+  systemPrompt: DEFAULT_PROMPT,
 
   setSessions: (sessions) => set({ sessions }),
 
@@ -27,6 +30,8 @@ export const useChatStore = create((set, get) => ({
 
   setTyping: (isTyping) => set({ isTyping }),
 
+  setSystemPrompt: (prompt) => set({ systemPrompt: prompt }),
+
   updateSessionTitle: (sessionId, title) => set((state) => ({
     sessions: state.sessions.map(s =>
       s.id === sessionId ? { ...s, title } : s
@@ -36,18 +41,14 @@ export const useChatStore = create((set, get) => ({
       : state.activeSession
   })),
 
-  // ← NEW: remove session from list
   removeSession: (sessionId) => set((state) => ({
     sessions: state.sessions.filter(s => s.id !== sessionId),
     activeSession: state.activeSession?.id === sessionId
-      ? null
-      : state.activeSession,
+      ? null : state.activeSession,
     messages: state.activeSession?.id === sessionId
-      ? []
-      : state.messages
+      ? [] : state.messages
   })),
 
-  // ← NEW: remove single message
   removeMessage: (messageId) => set((state) => ({
     messages: state.messages.filter(m => m.id !== messageId)
   }))

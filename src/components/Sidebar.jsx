@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useChatStore } from '../store/chatStore'
 import { createSession, getHistory, deleteSession } from '../services/api'
 import toast from 'react-hot-toast'
+import SystemPromptSelector from './SystemPromptSelector'
 
 export default function Sidebar({ open, onClose }) {
   const { sessions, activeSession, addSession, setActiveSession, setMessages, removeSession } = useChatStore()
@@ -151,6 +152,7 @@ export default function Sidebar({ open, onClose }) {
             Recent Chats
           </div>
 
+
           {sessions.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {[1, 2, 3].map(i => (
@@ -280,7 +282,23 @@ export default function Sidebar({ open, onClose }) {
               })}
             </div>
           )}
+                </div>
+
+        {/* System Prompt Selector — bottom of sidebar */}
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', flexShrink: 0 }}>
+          <div style={{
+            padding: '0 16px 8px',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: 'var(--text-muted)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase'
+          }}>
+            AI Personality
+          </div>
+          <SystemPromptSelector />
         </div>
+
       </aside>
     </>
   )
