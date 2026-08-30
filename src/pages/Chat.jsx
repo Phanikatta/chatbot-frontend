@@ -13,24 +13,34 @@ export default function Chat() {
   const { setSessions } = useChatStore()
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false) // ← closed by default on mobile
 
   useEffect(() => {
     if (!token) { navigate('/'); return }
     getSessions()
       .then(res => setSessions(res.data.sessions || []))
       .catch(() => setSessions([]))
+
+    // Open sidebar by default only on desktop
+    const isDesktop = window.innerWidth >= 768
+    setSidebarOpen(isDesktop)
   }, [token])
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', overflow: 'hidden' }}>
+    <div style={{
+      height: '100dvh', // ← dvh instead of vh — fixes mobile browser bar
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--bg-primary)',
+      overflow: 'hidden'
+    }}>
       <Header
         theme={theme}
         toggleTheme={toggleTheme}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <ChatWindow />
       </div>

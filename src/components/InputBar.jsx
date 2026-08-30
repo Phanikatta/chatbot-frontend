@@ -19,20 +19,28 @@ export default function InputBar({ onSend, disabled }) {
   const onInput = (e) => {
     setText(e.target.value)
     e.target.style.height = 'auto'
-    e.target.style.height = Math.min(e.target.scrollHeight, 130) + 'px'
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
   }
 
   const over = text.length > MAX
+  const canSend = text.trim() && !disabled && !over
 
   return (
-    <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', background: 'var(--bg-surface)', flexShrink: 0 }}>
+    <div style={{
+      padding: '12px 16px',
+      borderTop: '1px solid var(--border)',
+      background: 'var(--bg-surface)',
+      flexShrink: 0
+    }}>
       <div style={{
-        display: 'flex', alignItems: 'flex-end', gap: '12px',
-        padding: '12px 16px',
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: '10px',
+        padding: '10px 14px',
         borderRadius: '14px',
         background: 'var(--input-bg)',
-        border: `1.5px solid ${over ? 'var(--accent)' : text.length > 0 ? 'var(--accent)' : 'var(--border)'}`,
-        boxShadow: text.length > 0 ? '0 0 0 3px var(--accent-glow)' : 'none',
+        border: `1.5px solid ${canSend || over ? 'var(--accent)' : 'var(--border)'}`,
+        boxShadow: canSend ? '0 0 0 3px var(--accent-glow)' : 'none',
         transition: 'border-color 0.2s, box-shadow 0.2s'
       }}>
         <textarea
@@ -40,60 +48,73 @@ export default function InputBar({ onSend, disabled }) {
           value={text}
           onChange={onInput}
           onKeyDown={onKey}
-          placeholder={disabled ? 'AI is thinking...' : 'Ask anything... (Enter to send)'}
+          placeholder={disabled ? 'AI is thinking...' : 'Ask anything...'}
           disabled={disabled}
           rows={1}
           style={{
             flex: 1,
+            minWidth: 0, // ← critical for mobile
             background: 'transparent',
             border: 'none',
             outline: 'none',
             resize: 'none',
             fontSize: '15px',
-            lineHeight: '1.6',
+            lineHeight: '1.5',
             color: 'var(--text-primary)',
-            maxHeight: '130px',
+            maxHeight: '120px',
             fontFamily: 'Inter, sans-serif',
             opacity: disabled ? 0.6 : 1
           }}
         />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          {/* Counter — hide on very small screens */}
           <span style={{
             fontSize: '11px',
             color: over ? 'var(--accent)' : 'var(--text-muted)',
             fontWeight: over ? 600 : 400,
-            minWidth: '48px', textAlign: 'right'
+            display: window.innerWidth < 380 ? 'none' : 'block'
           }}>
             {text.length}/{MAX}
           </span>
 
+          {/* Send button */}
           <button
             onClick={send}
-            disabled={!text.trim() || disabled || over}
+            disabled={!canSend}
             style={{
-              width: '36px', height: '36px',
+              width: '38px',
+              height: '38px',
               borderRadius: '10px',
-              background: text.trim() && !disabled && !over ? 'var(--accent)' : 'var(--bg-card)',
+              background: canSend ? 'var(--accent)' : 'var(--bg-card)',
               border: 'none',
-              cursor: text.trim() && !disabled && !over ? 'pointer' : 'not-allowed',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: canSend ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               flexShrink: 0,
-              transition: 'background 0.2s, transform 0.1s',
-              boxShadow: text.trim() && !disabled ? '0 2px 8px var(--accent-glow)' : 'none'
-            }}
-            onMouseEnter={e => { if (text.trim() && !disabled) e.currentTarget.style.transform = 'scale(1.05)' }}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill={text.trim() && !disabled && !over ? 'white' : 'var(--text-muted)'}>
+              transition: 'background 0.2s',
+              boxShadow: canSend ? '0 2px 8px var(--accent-glow)' : 'none'
+            }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"
+              fill={canSend ? 'white' : 'var(--text-muted)'}>
               <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
             </svg>
           </button>
         </div>
       </div>
 
-      <p style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-        Enter to send · Shift+Enter for new line
-      </p>
+      {/* Hide hint on very small screens */}
+      {window.innerWidth >= 380 && (
+        <p style={{
+          textAlign: 'center',
+          fontSize: '11px',
+          color: 'var(--text-muted)',
+          marginTop: '6px'
+        }}>
+          Enter to send · Shift+Enter for new line
+        </p>
+      )}
     </div>
   )
 }
