@@ -46,3 +46,11 @@ export const getHistory = (sessionId) =>
   api.get(`/history/${sessionId}`)
 
 export default api
+
+// Delete entire session
+export const deleteSession = (sessionId) =>
+  api.delete(`/chat/session/${sessionId}`)
+
+// Delete single message
+export const deleteMessage = (messageId) =>
+  api.delete(`/chat/message/${messageId}`)

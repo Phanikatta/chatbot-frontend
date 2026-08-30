@@ -34,5 +34,21 @@ export const useChatStore = create((set, get) => ({
     activeSession: state.activeSession?.id === sessionId
       ? { ...state.activeSession, title }
       : state.activeSession
+  })),
+
+  // ← NEW: remove session from list
+  removeSession: (sessionId) => set((state) => ({
+    sessions: state.sessions.filter(s => s.id !== sessionId),
+    activeSession: state.activeSession?.id === sessionId
+      ? null
+      : state.activeSession,
+    messages: state.activeSession?.id === sessionId
+      ? []
+      : state.messages
+  })),
+
+  // ← NEW: remove single message
+  removeMessage: (messageId) => set((state) => ({
+    messages: state.messages.filter(m => m.id !== messageId)
   }))
 }))
